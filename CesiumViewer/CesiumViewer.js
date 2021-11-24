@@ -65,9 +65,15 @@ function main() {
       shouldAnimate: true,
       fullscreenButton: false,
       baseLayerPicker: false,
+      contextOptions: {
+        webgl: {
+          alpha: true,
+          preserveDrawingBuffer: true
+        }
+      },
     });
 
-    viewer.camera.setView({
+    viewer.camera.flyTo({
       // Cesium的坐标是以地心为原点
       // fromDegrees()方法，将经纬度和高程转换为世界坐标
       destination: Cartesian3.fromDegrees(defaultPosition[0], defaultPosition[1], 3000),
