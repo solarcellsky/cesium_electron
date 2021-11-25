@@ -7,6 +7,7 @@ import {
   formatError,
   Ion,
   knockout,
+  Color,
   Math as CesiumMath,
   objectToQuery,
   queryToObject,
@@ -16,9 +17,11 @@ import {
   TileMapServiceImageryProvider,
   Viewer,
   viewerCesiumInspectorMixin,
-  viewerDragDropMixin
+  viewerDragDropMixin,
 } from "../Source/Cesium.js";
 import { $config } from "./config.js";
+import { WeatherSystem } from "./WeatherSystem/WeatherSystem.js";
+import { $localStorage } from "./localStorage.js";
 
 function main() {
   /*
@@ -41,11 +44,11 @@ function main() {
       saveCamera=false    Don't automatically update the camera view in the URL when it changes.
      */
   Ion.defaultAccessToken = $config.CESIUM_ACCESS_TOKEN;
-  var defaultPosition =  $config.defaultPosition;
+  var defaultPosition = $config.defaultPosition;
   var defaultOrientation = $config.defaultOrientation;
 
   var endUserOptions = queryToObject(window.location.search.substring(1));
-      // endUserOptions.tmsImageryUrl = $config.TMS_IMAGERY_URL;
+  // endUserOptions.tmsImageryUrl = $config.TMS_IMAGERY_URL;
   var imageryProvider;
   if (defined(endUserOptions.tmsImageryUrl)) {
     imageryProvider = new TileMapServiceImageryProvider({
@@ -68,25 +71,41 @@ function main() {
       contextOptions: {
         webgl: {
           alpha: true,
-          preserveDrawingBuffer: true
-        }
+          depth: false,
+          stencil: true,
+          antialias: true,
+          premultipliedAlpha: true,
+          preserveDrawingBuffer: true,
+          failIfMajorPerformanceCaveat: true,
+        },
+        allowTextureFilterAnisotropic: true,
       },
     });
 
     viewer.camera.flyTo({
       // Cesium的坐标是以地心为原点
       // fromDegrees()方法，将经纬度和高程转换为世界坐标
-      destination: Cartesian3.fromDegrees(defaultPosition[0], defaultPosition[1], 3000),
-      orientation: defaultOrientation
+      destination: Cartesian3.fromDegrees(
+        defaultPosition[0],
+        defaultPosition[1],
+        3000
+      ),
+      orientation: defaultOrientation,
     });
 
     // homeButton Click event
-    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function(e) {
-			e.cancel = true;
-			viewer.camera.flyTo({
-				destination: Cartesian3.fromDegrees(defaultPosition[0], defaultPosition[1], 3000)
-			});
-		});
+    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(
+      function (e) {
+        e.cancel = true;
+        viewer.camera.flyTo({
+          destination: Cartesian3.fromDegrees(
+            defaultPosition[0],
+            defaultPosition[1],
+            3000
+          ),
+        });
+      }
+    );
 
     if (hasBaseLayerPicker && viewer.baseLayerPicker) {
       var viewModel = viewer.baseLayerPicker.viewModel;
@@ -130,21 +149,19 @@ function main() {
   var skyAtmosphere = scene.skyAtmosphere;
   var globe = scene.globe;
   var viewModel = {
-    hueShift: 0.0,
-    saturationShift: 0.0,
-    brightnessShift: 0.0,
+    hueShift: -0.9,
+    saturationShift: -0.7,
+    brightnessShift: -0.33,
   };
   // Convert the viewModel members into knockout observables.
   knockout.track(viewModel);
   // Make the skyAtmosphere's HSB parameters subscribers of the viewModel.
-  var subscribeParameter = function(name, globeName) {
-    knockout
-      .getObservable(viewModel, name)
-      .subscribe(function (newValue) {
-        skyAtmosphere[name] = newValue;
-        globe[globeName] = newValue;
-      });
-  }
+  var subscribeParameter = function (name, globeName) {
+    knockout.getObservable(viewModel, name).subscribe(function (newValue) {
+      skyAtmosphere[name] = newValue;
+      globe[globeName] = newValue;
+    });
+  };
 
   subscribeParameter("hueShift", "atmosphereHueShift");
   subscribeParameter("saturationShift", "atmosphereSaturationShift");
@@ -152,22 +169,34 @@ function main() {
 
   globe.enableLighting = true;
   scene.fog.enabled = true;
+  scene.enableWeather = true;
 
-  Sandcastle.addToggleButton(
-    "昼夜",
-    globe.enableLighting,
-    function (checked) {
-      globe.enableLighting = checked;
-    }
-  );
+  scene.fog.density = 0.001;
+  scene.fog.minimumBrightness = 0.8;
 
-  Sandcastle.addToggleButton(
-    "雾气",
-    scene.fog.enabled,
-    function (checked) {
-      scene.fog.enabled = checked;
+  Sandcastle.addToggleButton("昼夜", globe.enableLighting, function (checked) {
+    globe.enableLighting = checked;
+    $localStorage.set("enableLighting", checked);
+  });
+
+  Sandcastle.addToggleButton("雾气", scene.fog.enabled, function (checked) {
+    scene.fog.enabled = checked;
+    $localStorage.set("enableFog", checked);
+  });
+
+  Sandcastle.addToggleButton("天气", scene.enableWeather, function (checked) {
+    scene.enableWeather = checked;
+    $localStorage.set("enableWeather", checked);
+    if (checked) {
+      WeatherSystem.snow(scene)
+    } else {
+      WeatherSystem.clear(scene)
     }
-  );
+  });
+
+  
+  //天气系统下雪场景
+  WeatherSystem.snow(scene)
 
   if (endUserOptions.debug) {
     context.validateShaderProgram = true;

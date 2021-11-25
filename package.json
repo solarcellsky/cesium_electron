@@ -1,11 +1,24 @@
 {
-  "name": "electron-quick-start",
+  "name": "pkx-airport",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main.js",
+  "build": {
+    "appId": "com.pkxairport.app",
+    "mac": {
+      "icon": "Build/icons/icon.icns",
+      "target": ["dmg"]
+    },
+    "win": {
+      "icon": "Build/icons/icon.ico",
+      "target": ["nsis"]
+    }
+  },
   "scripts": {
     "start": "electron .",
-    "dev": "gulp watch:electron"
+    "dev": "gulp watch:electron",
+    "dist:mac": "electron-builder --mac --x64",
+    "dist:win": "electron-builder --win --x64"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -19,6 +32,7 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^16.0.1",
+    "electron-builder": "^22.14.5",
     "electron-connect": "^0.6.3",
     "gulp": "^4.0.2"
   },
