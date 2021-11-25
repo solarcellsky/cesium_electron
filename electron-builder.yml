@@ -1,7 +1,20 @@
 appId: com.pkxairport.app # 应用ID
 artifactName: "${productName}-Setup-${version}.${ext}" # 应用最终的名称
-productName: "大兴国际机场航空器除冰作业管理系统" # 打包完成后的应用名称
+productName: "PKX Airport" # 打包完成后的应用名称
 npmRebuild: true # 是否在开始编译前重构原生依赖,可先尝试true, 如果出现问题再修改为false,
+
+files:
+  - "**/*"
+  - "!LICENSE.md"
+  - "!README.md"
+  - "!package.json"
+  - "!package-lock.json"
+  - "!yarn.lock"
+  - "!node_modules/*"
+  - "!build.sh"
+  - "!electron-builder.yml"
+  - "!gulpfile.js"
+  - "!dist/*"
 
 mac: # 打包成mac环境参数
   target: 
