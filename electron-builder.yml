@@ -1,0 +1,30 @@
+appId: com.pkxairport.app # 应用ID
+artifactName: "${productName}-Setup-${version}.${ext}" # 应用最终的名称
+productName: "大兴国际机场航空器除冰作业管理系统" # 打包完成后的应用名称
+npmRebuild: true # 是否在开始编译前重构原生依赖,可先尝试true, 如果出现问题再修改为false,
+
+mac: # 打包成mac环境参数
+  target: 
+    - dmg # 打包为dmg格式(可选pkg,zip等)
+  icon: "./Build/icons/icon.icns" # 图标所在路径(使用字符串相对路径)
+dmg: # 安装界面
+  contents:
+    - x: 410
+      y: 170
+      type: link
+      path: /Applications
+    - x: 130
+      y: 170
+      type: file
+
+win: # 打包为win环境
+  icon: "./Build/icons/icon.ico" # 图标所在路径
+  target:
+    - nsis # 打包为nsis格式
+  verifyUpdateCodeSignature: false # 是否需要验证签名
+  # requestedExecutionLevel: requireAdministrator # 执行等级(是否需要管理员权限,通常情况不需要)
+nsis:
+  oneClick: false # 是否一键安装(静默安装)
+  createDesktopShortcut: always # 创建桌面快捷方式
+  createStartMenuShortcut: true # 创建开始菜单快捷方式
+  runAfterFinish: true # 安装完成后是否勾选立即执行

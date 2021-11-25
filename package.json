@@ -3,17 +3,6 @@
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main.js",
-  "build": {
-    "appId": "com.pkxairport.app",
-    "mac": {
-      "icon": "Build/icons/icon.icns",
-      "target": ["dmg"]
-    },
-    "win": {
-      "icon": "Build/icons/icon.ico",
-      "target": ["nsis"]
-    }
-  },
   "scripts": {
     "start": "electron .",
     "dev": "gulp watch:electron",
@@ -29,12 +18,14 @@
     "demo"
   ],
   "author": "GitHub",
-  "license": "CC0-1.0",
+  "license": "Apache License Version 2.0",
   "devDependencies": {
     "electron": "^16.0.1",
     "electron-builder": "^22.14.5",
     "electron-connect": "^0.6.3",
-    "gulp": "^4.0.2"
+    "fs": "0.0.1-security",
+    "gulp": "^4.0.2",
+    "path": "^0.12.7"
   },
   "dependencies": {
     "cesium": "^1.87.1"

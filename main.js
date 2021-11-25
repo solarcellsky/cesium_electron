@@ -5,10 +5,9 @@ const path = require('path')
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    fullscreen: false,
+    fullscreen: true,
     width: 1440,
     height: 800,
-    icon: path.join(__dirname, './CesiumViewer/Images/favicon3_300x300.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
