@@ -9,8 +9,8 @@ export const $config = {
   defaultPosition: [116.410088824153, 39.509140438939355],
   // 地图默认指向 视角
   defaultOrientation: {
-    heading: CesiumMath.toRadians(20.0),
-    pitch: CesiumMath.toRadians(-90.0),
+    heading: CesiumMath.toRadians(10.0), // east, default value is 0.0 (north) //东西南北朝向
+    pitch: CesiumMath.toRadians(-90.0), // default value (looking down)  //俯视仰视视觉
     roll: 0.0
   }
 }

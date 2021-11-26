@@ -7,7 +7,6 @@ import {
   formatError,
   Ion,
   knockout,
-  Color,
   Math as CesiumMath,
   objectToQuery,
   queryToObject,
@@ -21,6 +20,7 @@ import {
 } from "../Source/Cesium.js";
 import { $config } from "./config.js";
 import { WeatherSystem } from "./WeatherSystem/WeatherSystem.js";
+import { TimelineFormatter } from "./TimelineFormatter/TimelineFormatter.js";
 import { $localStorage } from "./localStorage.js";
 
 function main() {
@@ -58,6 +58,39 @@ function main() {
 
   var loadingIndicator = document.getElementById("loadingIndicator");
   var viewer;
+  /*
+    Viewer Options
+
+    {
+      //加载在线谷歌地图
+      //imageryProvider: new Cesium.UrlTemplateImageryProvider({
+      //  url: "http://www.google.cn/maps/vt?lyrs=s&x={x}&y={y}&z={z}"
+      //}),
+      imageryProvider: new Cesium.WebMapServiceImageryProvider({
+        //加载本地资源地球
+          url: Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')  
+      }),
+      homeButton: false, //主页按钮
+      baseLayerPicker: false, //是否显示图层选择控件
+      navigationHelpButton: false, //帮助信息按钮
+      geocoder: false, //是否显示地名查找控件
+      infoBox: false,//是否显示点击要素之后显示的信息
+      fullscreenButton: false, //是否显示全屏按钮
+      timeline: true, //是否显示时间线控件
+      animation: true, //是否显示动画控件
+      sceneModePicker: true,//是否显示投影方式控件
+      selectionIndicator: false, // 取消点击有绿框
+      shouldAnimate: true,  //允许动画
+      navigationInstructionsInitiallyVisible: false
+      // navigation: false,
+      sceneMode: 1,  //初始场景模式 1 2D模式 2 2D循环模式 3 3D模式  Cesium.SceneMode
+      scene3DOnly: false, //每个几何实例将只能以3D渲染以节省GPU内存
+    }
+
+    //光照: scene.globe.enableLighting
+    //雾效：scene.fog.enabled
+    //大气：scene.skyAtmosphere
+    */
   try {
     var hasBaseLayerPicker = !defined(imageryProvider);
     viewer = new Viewer("cesiumContainer", {
@@ -82,13 +115,18 @@ function main() {
       },
     });
 
+    // hide copyright info
+    viewer._cesiumWidget._creditContainer.style.display = "none";
+
+    // TimelineFormatter(viewer);
+
     viewer.camera.flyTo({
       // Cesium的坐标是以地心为原点
       // fromDegrees()方法，将经纬度和高程转换为世界坐标
       destination: Cartesian3.fromDegrees(
         defaultPosition[0],
         defaultPosition[1],
-        3000
+        3000.0
       ),
       orientation: defaultOrientation,
     });
@@ -167,24 +205,47 @@ function main() {
   subscribeParameter("saturationShift", "atmosphereSaturationShift");
   subscribeParameter("brightnessShift", "atmosphereBrightnessShift");
 
-  globe.enableLighting = true;
-  scene.fog.enabled = true;
-  scene.enableWeather = true;
+  // 读取 localStorage
+  const $enableLighting = $localStorage.get("enableLighting");
+  const $enableFog = $localStorage.get("enableFog");
+  const $enableWeather = $localStorage.get("enableWeather");
+
+  if ($enableLighting == "true") {
+    globe.enableLighting = true;
+  } else {
+    globe.enableLighting = false;
+  }
+
+  if ($enableFog == "true") {
+    scene.fog.enabled = true;
+  } else {
+    scene.fog.enabled = false;
+  }
+
+  if ($enableWeather == "true") {
+    WeatherSystem.snow(scene)
+    scene.enableWeather = true;
+  } else {
+    WeatherSystem.clear(scene)
+    scene.enableWeather = false;
+  }
 
   scene.fog.density = 0.001;
   scene.fog.minimumBrightness = 0.8;
 
-  Sandcastle.addToggleButton("昼夜", globe.enableLighting, function (checked) {
+  // 添加场景效果切换按钮
+  Sandcastle.addToggleButton("昼夜", globe.enableLighting, (checked) => {
     globe.enableLighting = checked;
-    $localStorage.set("enableLighting", checked);
+    $localStorage.set("enableLighting", checked)
   });
 
-  Sandcastle.addToggleButton("雾气", scene.fog.enabled, function (checked) {
+  Sandcastle.addToggleButton("雾效", scene.fog.enabled, (checked) => {
     scene.fog.enabled = checked;
     $localStorage.set("enableFog", checked);
   });
 
-  Sandcastle.addToggleButton("天气", scene.enableWeather, function (checked) {
+  Sandcastle.addToggleButton("天气", scene.enableWeather, (checked) => {
+    console.log(typeof(checked), checked);
     scene.enableWeather = checked;
     $localStorage.set("enableWeather", checked);
     if (checked) {
@@ -195,8 +256,7 @@ function main() {
   });
 
   
-  //天气系统下雪场景
-  WeatherSystem.snow(scene)
+  
 
   if (endUserOptions.debug) {
     context.validateShaderProgram = true;

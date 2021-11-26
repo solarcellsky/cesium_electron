@@ -11,14 +11,14 @@
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "3D",
+    "webgl",
+    "geospatial",
+    "map",
+    "globe"
   ],
-  "author": "GitHub",
-  "license": "Apache License Version 2.0",
+  "author": "GW",
+  "license": "Apache-2.0",
   "devDependencies": {
     "electron": "^16.0.1",
     "electron-builder": "^22.14.5",
