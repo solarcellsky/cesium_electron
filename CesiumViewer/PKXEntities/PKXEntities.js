@@ -113,7 +113,7 @@ export const PKXEntities = {
     });
 
     //Add button to view the path from the side
-    Sandcastle.addToolbarButton("侧视", function () {
+    Sandcastle.addToolbarButton("平视", function () {
       viewer.trackedEntity = undefined;
       viewer.zoomTo(
         viewer.entities,
