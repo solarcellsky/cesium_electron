@@ -5,4 +5,7 @@ export const $localStorage = {
   get: function (key) {
     return window.localStorage.getItem(key)
   },
+  clear: function () {
+    window.localStorage.clear()
+  }
 }

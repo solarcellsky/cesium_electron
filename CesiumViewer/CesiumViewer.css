@@ -48,3 +48,17 @@ body {
   font-size: 12px;
   font-weight: bold;
 }
+
+#PKXlogo {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 180px;
+  height: 65px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url(Images/logo_400x145_72dpi.png);
+  background-color: rgba(255, 255, 255, .618);
+  background-size: 80% auto;
+  border-radius: 5px;
+}

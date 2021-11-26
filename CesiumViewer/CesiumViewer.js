@@ -17,11 +17,11 @@ import {
   Viewer,
   viewerCesiumInspectorMixin,
   viewerDragDropMixin,
+  JulianDate as CesiumJulianDate,
 } from "../Source/Cesium.js";
 import { $config } from "./config.js";
-import { WeatherSystem } from "./WeatherSystem/WeatherSystem.js";
-import { TimelineFormatter } from "./TimelineFormatter/TimelineFormatter.js";
-import { $localStorage } from "./localStorage.js";
+import { PKXSceneEffect } from "./PKXSceneEffect/PKXSceneEffect.js";
+import { PKXEntities } from "./PKXEntities/PKXEntities.js";
 
 function main() {
   /*
@@ -154,6 +154,7 @@ function main() {
         requestVertexNormals: true,
       });
     }
+
   } catch (exception) {
     loadingIndicator.style.display = "none";
     var message = formatError(exception);
@@ -205,56 +206,22 @@ function main() {
   subscribeParameter("saturationShift", "atmosphereSaturationShift");
   subscribeParameter("brightnessShift", "atmosphereBrightnessShift");
 
-  // 读取 localStorage
-  const $enableLighting = $localStorage.get("enableLighting");
-  const $enableFog = $localStorage.get("enableFog");
-  const $enableWeather = $localStorage.get("enableWeather");
-
-  if ($enableLighting == "true") {
-    globe.enableLighting = true;
-  } else {
-    globe.enableLighting = false;
-  }
-
-  if ($enableFog == "true") {
-    scene.fog.enabled = true;
-  } else {
-    scene.fog.enabled = false;
-  }
-
-  if ($enableWeather == "true") {
-    WeatherSystem.snow(scene)
-    scene.enableWeather = true;
-  } else {
-    WeatherSystem.clear(scene)
-    scene.enableWeather = false;
-  }
-
-  scene.fog.density = 0.001;
-  scene.fog.minimumBrightness = 0.8;
-
   // 添加场景效果切换按钮
-  Sandcastle.addToggleButton("昼夜", globe.enableLighting, (checked) => {
-    globe.enableLighting = checked;
-    $localStorage.set("enableLighting", checked)
+  PKXSceneEffect.init({
+    globe: globe,
+    scene: scene,
+  })
+  
+  // 添加飞机模型到场景
+  PKXEntities.airplane({
+    viewer: viewer,
+    start: CesiumJulianDate.fromDate(new Date()),
+    position: defaultPosition,
+    model: {
+      uri: "CesiumViewer/models/CesiumAir/Cesium_Air.glb",
+      minimumPixelSize: 66,
+    },
   });
-
-  Sandcastle.addToggleButton("雾效", scene.fog.enabled, (checked) => {
-    scene.fog.enabled = checked;
-    $localStorage.set("enableFog", checked);
-  });
-
-  Sandcastle.addToggleButton("天气", scene.enableWeather, (checked) => {
-    console.log(typeof(checked), checked);
-    scene.enableWeather = checked;
-    $localStorage.set("enableWeather", checked);
-    if (checked) {
-      WeatherSystem.snow(scene)
-    } else {
-      WeatherSystem.clear(scene)
-    }
-  });
-
   
   
 
