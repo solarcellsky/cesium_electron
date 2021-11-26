@@ -2,8 +2,8 @@ import { WeatherSystem } from "../WeatherSystem/WeatherSystem.js";
 import { $localStorage } from "../localStorage.js";
 
 export const PKXSceneEffect = {
-  init: (oprions) => {
-    const { globe, scene } = oprions;
+  init: (options) => {
+    const { globe, scene } = options;
     // 读取 localStorage
     const $enableLighting = $localStorage.get("enableLighting");
     const $enableFog = $localStorage.get("enableFog");
