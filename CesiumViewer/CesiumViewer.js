@@ -6,7 +6,10 @@ import {
   defined,
   formatError,
   Ion,
+  Color,
   knockout,
+  Rectangle,
+  ImageMaterialProperty,
   Math as CesiumMath,
   objectToQuery,
   queryToObject,
@@ -115,8 +118,84 @@ function main() {
       },
     });
 
+    // HEATMAP
+    var len = 300;
+    var points = [];
+    var max = 100;
+    var width = 600;
+    var height = 400;
+
+    var latMin = 39.808265;
+    var latMax = 40.114091;
+    var lonMin = 116.393777;
+    var lonMax = 116.622018;
+
+    var dataRaw = [];
+    for (var i = 0; i < len; i++) {
+      var point = {
+        lat: latMin + Math.random() * (latMax - latMin),
+        lon: lonMin + Math.random() * (lonMax - lonMin),
+        value: Math.floor(Math.random() * 100)
+      };
+      dataRaw.push(point);
+    }
+//
+    for (var i = 0; i < len; i++) {
+      var dataItem = dataRaw[i];
+      var point = {
+        x: Math.floor((dataItem.lat - latMin) / (latMax - latMin) * width),
+        y: Math.floor((dataItem.lon - lonMin) / (lonMax - lonMin) * height),
+        value: Math.floor(dataItem.value)
+      };
+      max = Math.max(max, dataItem.value);
+      points.push(point);
+    }
+
+
+    var heatmapInstance = h337.create({
+      // only container is required, the rest will be defaults
+      container: document.getElementById("heatmap"),
+    });
+    
+    // heatmap data format
+    var data = {
+      max: max,
+      data: points
+    };
+    // if you have a set of datapoints always use setData instead of addData
+    // for data initialization
+    heatmapInstance.setData(data);
+
+    var canvas = document.getElementsByClassName('heatmap-canvas');
+    console.log(canvas[0]);
+
+    viewer.entities.add({
+      name: 'heatmap',
+      rectangle: {
+        coordinates: Rectangle.fromDegrees(lonMin, latMin, lonMax, latMax),
+        material: new ImageMaterialProperty({
+          image: canvas[0],
+          transparent: true
+        })
+      }
+    });
+
     // hide copyright info
     viewer._cesiumWidget._creditContainer.style.display = "none";
+
+
+    var dataSource = GeoJsonDataSource.load(
+      "./CesiumViewer/geojson/110105.json",
+      {
+        stroke: Color.WHITE,
+        fill: Color.BLUE.withAlpha(0.5),
+        strokeWidth: 3,
+      }
+    );
+    viewer.dataSources.add(dataSource);
+    viewer.zoomTo(dataSource);
+
+    console.log(viewer.entities)
 
     // TimelineFormatter(viewer);
 
